@@ -1,32 +1,30 @@
-
-// Sudoku.h : PROJECT_NAME 应用程序的主头文件
-//
-
 #pragma once
 
-#ifndef __AFXWIN_H__
-	#error "在包含此文件之前包含“stdafx.h”以生成 PCH 文件"
-#endif
-
-#include "resource.h"		// 主符号
-
-
-// CSudokuApp: 
-// 有关此类的实现，请参阅 Sudoku.cpp
-//
-
-class CSudokuApp : public CWinApp
+class Sudoku
 {
 public:
-	CSudokuApp();
+	Sudoku();
+	Sudoku(char* data);
+	~Sudoku() { }
 
-// 重写
-public:
-	virtual BOOL InitInstance();
+	struct Cell;
 
-// 实现
+	void Set(int i, int j, char v);
+	char Get(int i, int j);
+	bool IsOrigin(int i, int j);
+	bool IsValid(int i, int j);
+	bool IsFinish();
 
-	DECLARE_MESSAGE_MAP()
+private:
+	Cell* m_Grid[9][9];
+
+	bool checkRows();
+	bool checkCols();
+	bool checkBlocks();
+
+	bool CheckRow(int i, int j);
+	bool CheckCol(int i, int j);
+	bool CheckBlock(int i, int j);
+
 };
 
-extern CSudokuApp theApp;
