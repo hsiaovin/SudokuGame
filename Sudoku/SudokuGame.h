@@ -15,14 +15,14 @@ public:
 	void Move(WPARAM key);
 	void Select(CPoint point);
 	void Set(char value);
-	void TimeCounting();
+	void TimerUpdate();
 	CString GetTimer();
 	int GetBoardSize();
 
 private:
 	static UINT NewGameThread(void *param);
 
-	void DrawCell(int x, int y);
+	void DrawCell(int i, int j);
 	CRect CellRect(int i, int j);
 
 	CPoint CursorToCell(CPoint cur);

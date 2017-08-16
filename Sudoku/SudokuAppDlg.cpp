@@ -69,16 +69,6 @@ BOOL CSudokuAppDlg::OnInitDialog()
 	pWStatic->SetWindowPos(pWButton, 270, 450, 0, 0, 
 		SWP_NOZORDER | SWP_NOSIZE);
 
-	//CProgressCtrl *pProgCtrl = (CProgressCtrl*)GetDlgItem(IDC_PROGRESS1);
-	//int nPrePos = pProgCtrl->StepIt();
-	//pProgCtrl->SetRange(0, 100);
-	//pProgCtrl->SetStep(1);
-	//for (int j = 0; j < 100; j++) {
-	//	for (int i = 0; i < 100; i++) {
-	//		pProgCtrl->SetPos(i);
-	//	}
-	//}
-
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -166,7 +156,7 @@ void CSudokuAppDlg::OnTimer(UINT_PTR nIDEvent)
 	switch (nIDEvent) {
 	case ID_TIMER:
 	{
-		m_pSudoku->TimeCounting();
+		m_pSudoku->TimerUpdate();
 		SetDlgItemText(IDC_STATIC, m_pSudoku->GetTimer());
 		break;
 	}

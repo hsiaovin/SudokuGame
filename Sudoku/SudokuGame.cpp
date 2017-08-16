@@ -48,18 +48,19 @@ int SudokuGame::GetBoardSize() {
 UINT SudokuGame::NewGameThread(void *param) {
 	CString str = HttpGet(_T("http://show.websudoku.com/?level=3"));
 	int idx = str.Find(_T("<INPUT NAME=cheat ID=\"cheat\" TYPE=hidden VALUE="));
-	CString data = str.Mid(idx + 48, 81);
+	CString cData = str.Mid(idx + 48, 81);
 	idx = str.Find(_T("<INPUT ID=\"editmask\" TYPE=hidden VALUE="));
-	CString data_mask = str.Mid(idx + 40, 81);
+	CString cMask = str.Mid(idx + 40, 81);
 
-	char* res = UnicodeToChar(data);
-	char* mask = UnicodeToChar(data_mask);
+	//char* data = UnicodeToChar(cData);
+	char* data = new char[81];
 	for (int i = 0; i < 81; i++) {
-		if (mask[i] == '1') res[i] = '0';
+		if (cMask[i] == _TCHAR('0')) 
+			data[i] = char(cData[i]);
 	}
 
 	SudokuGame *game = (SudokuGame*)param;
-	game->m_Board = Sudoku(res);
+	game->m_Board = Sudoku(data);
 	game->DrawBoard();
 	game->m_Timer = CTime(1997, 1, 1, 0, 0, 0);
 	game->m_bIsBegin = true;
@@ -74,7 +75,7 @@ void SudokuGame::NewGame() {
 	AfxBeginThread(NewGameThread, this, THREAD_PRIORITY_IDLE);
 }
 
-void SudokuGame::TimeCounting() {
+void SudokuGame::TimerUpdate() {
 	if (m_bIsBegin) m_Timer += CTimeSpan(0, 0, 0, 1);
 }
 
@@ -100,17 +101,17 @@ void SudokuGame::DrawCell(int x, int y) {
 	if (x < 0 || x >= 9 || y < 0 || y >= 9) return;
 	
 	CRect rect = CellRect(x, y);
-	if (m_Board.IsOrigin(x, y)) {
+	if (m_SelectedX == x && m_SelectedY == y) {
+		m_pDC->SetTextColor(TextColor);
+		m_pDC->FillSolidRect(rect, SelectedCellColor);
+	}
+	else if (m_Board.IsOrigin(x, y)) {
 		m_pDC->SetTextColor(OriginTextColor);
 		m_pDC->FillSolidRect(rect, OriginCellColor);
 	} 
 	else if (!m_Board.IsValid(x, y)) {
 		m_pDC->SetTextColor(TextColor);
 		m_pDC->FillSolidRect(rect, WarningColor);
-	} 
-	else if (m_SelectedX == x && m_SelectedY == y) {
-		m_pDC->SetTextColor(TextColor);
-		m_pDC->FillSolidRect(rect, SelectedCellColor);
 	} 
 	else {
 		m_pDC->SetTextColor(TextColor);
@@ -120,12 +121,12 @@ void SudokuGame::DrawCell(int x, int y) {
 }
 
 void SudokuGame::Select(CPoint point) {
-	int oldX = m_SelectedX;
-	int oldY = m_SelectedY;
 	POINT p = CursorToCell(point);
+
+	int old_x = m_SelectedX, old_y = m_SelectedY;
 	m_SelectedX = p.x;
 	m_SelectedY = p.y;
-	DrawCell(oldX, oldY); // clear old selected;
+	DrawCell(old_x, old_y); // clear old selected;
 	DrawCell(m_SelectedX, m_SelectedY);
 }
 
@@ -142,23 +143,23 @@ bool SudokuGame::OnKeyDown(WPARAM msg) {
 }
 
 void SudokuGame::Move(WPARAM key) {
-	int x = m_SelectedX;
-	int y = m_SelectedY;
+	int old_x = m_SelectedX, old_y = m_SelectedY;
 	switch (key) {
 	case VK_LEFT:
-		y -= 1;
+		if (old_x > 0) m_SelectedX -= 1;
 		break;
 	case VK_RIGHT:
-		y += 1;
+		if (old_x < 8) m_SelectedX += 1;
 		break;
 	case VK_UP:
-		x -= 1;
+		if (old_y > 0) m_SelectedY -= 1;
 		break;
 	case VK_DOWN:
-		x += 1;
+		if (old_y < 8) m_SelectedY += 1;
 		break;
 	}
-	Select(CPoint(x, y));
+	DrawCell(old_x, old_y);
+	DrawCell(m_SelectedX, m_SelectedY);
 }
 
 void SudokuGame::Set(char value) {
@@ -197,8 +198,14 @@ CString SudokuGame::HttpGet(_TCHAR* url) {
 }
 
 char* SudokuGame::UnicodeToChar(CString src) {
-	int iLen = WideCharToMultiByte(CP_ACP, 0, src, -1, NULL, 0, NULL, NULL);
-	char *res = new char[iLen];
-	WideCharToMultiByte(CP_ACP, 0, src, -1, res, iLen, NULL, NULL);
-	return res;
+	//int iLen = WideCharToMultiByte(CP_ACP, 0, src, -1, NULL, 0, NULL, NULL);
+	//if (iLen == 0) return "";
+	//char *dst = new char[iLen];
+	//WideCharToMultiByte(CP_ACP, 0, src, -1, dst, iLen, NULL, NULL);
+	//return dst;
+
+	//size_t len = wcslen(src) + 1;
+	//char* dst = new char[len];
+	//wcstombs_s(NULL, dst, len, src, len);
+	//return dst;
 }
